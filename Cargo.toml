@@ -4,7 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.5.13", features = ["derive"] }
+num_cpus = "1.16.0"
+rayon = "1.10.0"
 
 [[bin]]
 name = "bench"
 path = "src/main.rs"
+
+[profile.release]
+debug = false
+lto = true
+# codegen-units = 1
+incremental = false
