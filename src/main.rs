@@ -18,7 +18,8 @@ use std::time::Instant;
 use crate::utils::arg_parser::ArgParser;
 use crate::utils::benchmark::{Benchmark, BenchmarkType};
 
-const HLINE: &str = "----------------------------------------------------------------------------";
+const HLINE: &str =
+    "----------------------------------------------------------------------------------------------------------";
 
 macro_rules! bench {
     ($tag:expr, $func:expr, $times:expr, $index:expr) => {
@@ -34,7 +35,7 @@ fn main() {
         .build_global()
         .unwrap();
 
-    println!("Benchmarking with {:#?} workers.", arg_parser.n);
+    println!("Benchmarking with {:#?} threads.", arg_parser.n);
 
     const BYTES_PER_WORD: usize = size_of::<f64>();
     let n = arg_parser.size;
@@ -102,8 +103,12 @@ fn main() {
     let mut d: Vec<f64> = (0..n).into_par_iter().map(|_| 1.0).collect();
 
     let e = s.elapsed();
+    println!(
+        "Total allocated datasize: {:.2} MB.",
+        4.0 * (BYTES_PER_WORD * n) as f64 * 1.0e-6
+    );
 
-    println!("Initialization of arrays took : {e:#?}");
+    println!("Initialization of arrays took : {e:#?}.");
 
     let scalar = 3.0;
 
@@ -157,18 +162,22 @@ fn main() {
             times,
             k
         );
-
-        for j in 0..num_of_benchmarks {
-            for k in 0..ntimes {
-                avgtime[j] += times[j][k];
-                mintime[j] = f64::min(mintime[j], times[j][k]);
-                maxtime[j] = f64::max(maxtime[j], times[j][k]);
-            }
-        }
     }
 
+    for j in 0..num_of_benchmarks {
+        for k in 0..ntimes {
+            avgtime[j] += times[j][k];
+            mintime[j] = f64::min(mintime[j], times[j][k]);
+            maxtime[j] = f64::max(maxtime[j], times[j][k]);
+        }
+    }
     println!("{HLINE}");
-    println!("Function      Rate(MB/s)  Rate(MFlop/s)  Avg time     Min time     Max time\n");
+    println!(
+        "{0: <15} | {1: <15} | {2: <15} | {3: <15}| {4: <15} | {5: <15} |",
+        "Function", "Rate(MB/s)", "Rate(MFlop/s)", "Avg time", "Min time", "Max time"
+    );
+    println!("{HLINE}");
+
     for j in 0..num_of_benchmarks {
         avgtime[j] /= (ntimes - 1) as f64;
         let bytes = benchmarks[j].words * BYTES_PER_WORD * n;
@@ -176,19 +185,20 @@ fn main() {
 
         if flops > 0 {
             println!(
-                "{}         {:.2}       {:.2}          {:.4}        {:.4}        {:.4}",
+                "{0: <15} | {1: <15.2} | {2: <15.2} | {3: <15.4}| {4: <15.4} | {5: <15.4} |",
                 benchmarks[j].label,
-                1e-6 * bytes as f64 / mintime[j],
-                1e-6 * flops as f64 / mintime[j],
+                1.0e-6 * bytes as f64 / mintime[j],
+                1.0e-6 * flops as f64 / mintime[j],
                 avgtime[j],
                 mintime[j],
                 maxtime[j]
             );
         } else {
             println!(
-                "{}         {:.2}       -            {:.4}        {:.4}        {:.4}",
+                "{0: <15} | {1: <15.2} | {2: <15} | {3: <15.4}| {4: <15.4} | {5: <15.4} |",
                 benchmarks[j].label,
-                1e-6 * bytes as f64 / mintime[j],
+                1.0e-6 * bytes as f64 / mintime[j],
+                "-",
                 avgtime[j],
                 mintime[j],
                 maxtime[j]

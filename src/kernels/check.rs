@@ -10,7 +10,7 @@ pub fn check(a: &Vec<f64>, b: &Vec<f64>, c: &Vec<f64>, d: &Vec<f64>, n: usize, n
     let mut bsum = 0.0;
     let mut csum = 0.0;
     let mut dsum = 0.0;
-    let epsilon = 1e-8;
+    let epsilon = 1.0e-8;
 
     /* now execute timing loop */
     let scalar = 3.0;
