@@ -12,6 +12,6 @@ pub enum Benchmark {
 
 pub struct BenchmarkType {
     pub label: String,
-    pub words: i8,
-    pub flops: i8,
+    pub words: usize,
+    pub flops: usize,
 }

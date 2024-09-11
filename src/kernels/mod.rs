@@ -6,3 +6,4 @@ pub mod striad;
 pub mod sum;
 pub mod triad;
 pub mod update;
+pub mod check;

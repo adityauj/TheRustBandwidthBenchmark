@@ -2,6 +2,7 @@ mod kernels;
 mod utils;
 
 use clap::Parser;
+use kernels::check::check;
 use kernels::copy::copy;
 use kernels::daxpy::daxpy;
 use kernels::init::init;
@@ -17,8 +18,7 @@ use std::time::Instant;
 use crate::utils::arg_parser::ArgParser;
 use crate::utils::benchmark::{Benchmark, BenchmarkType};
 
-const HLINE: &str =
-    "----------------------------------------------------------------------------\n";
+const HLINE: &str = "----------------------------------------------------------------------------";
 
 macro_rules! bench {
     ($tag:expr, $func:expr, $times:expr, $index:expr) => {
@@ -37,7 +37,8 @@ fn main() {
     println!("Benchmarking with {:#?} workers.", arg_parser.n);
 
     const BYTES_PER_WORD: usize = size_of::<f64>();
-    let n: usize = arg_parser.size;
+    let n = arg_parser.size;
+    let ntimes = arg_parser.ntimes;
 
     let num_of_benchmarks = Benchmark::Numbench as usize;
 
@@ -55,37 +56,37 @@ fn main() {
         BenchmarkType {
             label: "Sum:    ".to_string(),
             words: 1,
-            flops: 0,
+            flops: 1,
         },
         BenchmarkType {
             label: "Copy:   ".to_string(),
-            words: 1,
+            words: 2,
             flops: 0,
         },
         BenchmarkType {
             label: "Update: ".to_string(),
-            words: 1,
-            flops: 0,
+            words: 2,
+            flops: 1,
         },
         BenchmarkType {
             label: "Triad:  ".to_string(),
-            words: 1,
-            flops: 0,
+            words: 2,
+            flops: 2,
         },
         BenchmarkType {
             label: "Daxpy:  ".to_string(),
-            words: 1,
-            flops: 0,
+            words: 3,
+            flops: 2,
         },
         BenchmarkType {
             label: "STriad: ".to_string(),
-            words: 1,
-            flops: 0,
+            words: 4,
+            flops: 2,
         },
         BenchmarkType {
             label: "SDaxpy: ".to_string(),
-            words: 1,
-            flops: 0,
+            words: 4,
+            flops: 2,
         },
     ];
 
@@ -93,6 +94,7 @@ fn main() {
 
     // Can also randomise the initialisation of arrays with rand crate : https://docs.rs/rand/0.8.5/rand/
     // let mut x: Arc<Vec<f64>> = Arc::new((0..n).into_par_iter().map(|_| (rand::random::<i32>() % 100) as f64 + 1.1).collect());
+    // But randomising will fail the check function at the end.
 
     let mut a: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
     let mut b: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
@@ -105,7 +107,7 @@ fn main() {
 
     let scalar = 3.0;
 
-    for k in 0..arg_parser.ntimes {
+    for k in 0..ntimes {
         bench!(
             Benchmark::Init as usize,
             init(b.as_mut(), scalar, n),
@@ -157,7 +159,7 @@ fn main() {
         );
 
         for j in 0..num_of_benchmarks {
-            for k in 0..arg_parser.ntimes {
+            for k in 0..ntimes {
                 avgtime[j] += times[j][k];
                 mintime[j] = f64::min(mintime[j], times[j][k]);
                 maxtime[j] = f64::max(maxtime[j], times[j][k]);
@@ -165,12 +167,35 @@ fn main() {
         }
     }
 
-    println!("{HLINE:#?}");
+    println!("{HLINE}");
     println!("Function      Rate(MB/s)  Rate(MFlop/s)  Avg time     Min time     Max time\n");
+    for j in 0..num_of_benchmarks {
+        avgtime[j] /= (ntimes - 1) as f64;
+        let bytes = benchmarks[j].words * BYTES_PER_WORD * n;
+        let flops = benchmarks[j].flops * n;
 
+        if flops > 0 {
+            println!(
+                "{}         {:.2}       {:.2}          {:.4}        {:.4}        {:.4}",
+                benchmarks[j].label,
+                1e-6 * bytes as f64 / mintime[j],
+                1e-6 * flops as f64 / mintime[j],
+                avgtime[j],
+                mintime[j],
+                maxtime[j]
+            );
+        } else {
+            println!(
+                "{}         {:.2}       -            {:.4}        {:.4}        {:.4}",
+                benchmarks[j].label,
+                1e-6 * bytes as f64 / mintime[j],
+                avgtime[j],
+                mintime[j],
+                maxtime[j]
+            );
+        }
+    }
+    println!("{HLINE}");
 
-
-
-
-    
+    check(a.as_ref(), b.as_ref(), c.as_ref(), d.as_ref(), n, ntimes);
 }

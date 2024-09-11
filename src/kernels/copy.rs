@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-#[allow(clippy::ptr_arg)]
+#[allow(clippy::ptr_arg, clippy::manual_memcpy)]
 pub fn copy(c: &mut Vec<f64>, a: &Vec<f64>, n: usize) -> f64 {
     let s = Instant::now();
 
