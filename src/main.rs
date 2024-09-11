@@ -100,7 +100,7 @@ fn main() {
     let mut a: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
     let mut b: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
     let mut c: Vec<f64> = (0..n).into_par_iter().map(|_| 0.5).collect();
-    let mut d: Vec<f64> = (0..n).into_par_iter().map(|_| 1.0).collect();
+    let d: Vec<f64> = (0..n).into_par_iter().map(|_| 1.0).collect();
 
     let e = s.elapsed();
     println!(
@@ -146,19 +146,19 @@ fn main() {
         );
         bench!(
             Benchmark::Daxpy as usize,
-            daxpy(a.as_mut(), b.as_mut(), scalar, n),
+            daxpy(a.as_mut(), b.as_ref(), scalar, n),
             times,
             k
         );
         bench!(
             Benchmark::Striad as usize,
-            striad(a.as_mut(), b.as_mut(), c.as_mut(), d.as_mut(), n),
+            striad(a.as_mut(), b.as_ref(), c.as_ref(), d.as_ref(), n),
             times,
             k
         );
         bench!(
             Benchmark::Sdaxpy as usize,
-            sdaxpy(a.as_mut(), b.as_mut(), c.as_mut(), n),
+            sdaxpy(a.as_mut(), b.as_ref(), c.as_ref(), n),
             times,
             k
         );

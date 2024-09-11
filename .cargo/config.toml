@@ -1,2 +1,6 @@
 [build]
 rustflags = ["-C", "target-cpu=native"]
+
+# Can also specify your simd flags like avx512 etc.
+# https://rust-lang.github.io/packed_simd/perf-guide/target-feature/rustflags.html
+# rustflags = ["-C", "target-cpu=native", "-C", "target-feature=+avx,+fma"]
