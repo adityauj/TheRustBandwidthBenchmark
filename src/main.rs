@@ -72,7 +72,7 @@ fn main() {
         },
         BenchmarkType {
             label: "Triad:  ".to_string(),
-            words: 2,
+            words: 3,
             flops: 2,
         },
         BenchmarkType {
@@ -180,7 +180,7 @@ fn main() {
     println!("{HLINE}");
 
     for j in 0..num_of_benchmarks {
-        avgtime[j] /= (ntimes - 1) as f64;
+        avgtime[j] /= ntimes as f64;
         let bytes = benchmarks[j].words * BYTES_PER_WORD * n;
         let flops = benchmarks[j].flops * n;
 

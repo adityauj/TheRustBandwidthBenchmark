@@ -9,9 +9,9 @@ pub fn triad(a: &mut [f64], b: &[f64], c: &[f64], scalar: f64, n: usize) -> f64 
 
     let s = Instant::now();
 
-    // Serial version
-    // for i in 0..(n * 8) {
-    //     a[i] = c[i].mul_add(scalar, b[i]);
+    // // Serial version
+    // for i in (0..n) {
+    //     a[i] = c[i] * scalar + b[i];
     // }
 
     // Parallel version
@@ -19,7 +19,7 @@ pub fn triad(a: &mut [f64], b: &[f64], c: &[f64], scalar: f64, n: usize) -> f64 
         a_slice
             .iter_mut()
             .enumerate()
-            .for_each(|(i, val)| *val = c[i].mul_add(scalar, b[i]))
+            .for_each(|(i, val)| *val = c[i] * scalar + b[i])
     });
 
     s.elapsed().as_secs_f64()
