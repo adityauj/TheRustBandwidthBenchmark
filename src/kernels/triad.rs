@@ -1,19 +1,26 @@
 use std::time::Instant;
 
-use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
+use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, unused_variables)]
-pub fn triad(a: &mut Vec<f64>, b: &Vec<f64>, c: &Vec<f64>, scalar: f64, n: usize) -> f64 {
+#[inline(never)]
+pub fn triad(a: &mut [f64], b: &[f64], c: &[f64], scalar: f64, n: usize) -> f64 {
+    let a_iter = a.par_chunks_mut(n);
+
     let s = Instant::now();
 
-    a.par_iter_mut()
-        .enumerate()
-        .for_each(|(i, x)| *x = b[i] + scalar * c[i]);
-
     // Serial version
-    // for i in 0..n {
-    //     a[i] = b[i] + scalar * c[i];
+    // for i in 0..(n * 8) {
+    //     a[i] = c[i].mul_add(scalar, b[i]);
     // }
+
+    // Parallel version
+    a_iter.for_each(|a_slice| {
+        a_slice
+            .iter_mut()
+            .enumerate()
+            .for_each(|(i, val)| *val = c[i].mul_add(scalar, b[i]))
+    });
 
     s.elapsed().as_secs_f64()
 }

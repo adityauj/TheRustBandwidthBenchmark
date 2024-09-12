@@ -1,6 +1,7 @@
-[build]
+# For generic x86_64 architecture.
+[x86_64-unknown-linux-gnu]
 rustflags = ["-C", "target-cpu=native"]
 
-# Can also specify your simd flags like avx512 etc.
+# Use +avx512 to enable avx512.
 # https://rust-lang.github.io/packed_simd/perf-guide/target-feature/rustflags.html
 # rustflags = ["-C", "target-cpu=native", "-C", "target-feature=+avx,+fma"]

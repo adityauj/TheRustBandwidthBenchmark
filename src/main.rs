@@ -40,6 +40,7 @@ fn main() {
     const BYTES_PER_WORD: usize = size_of::<f64>();
     let n = arg_parser.size;
     let ntimes = arg_parser.ntimes;
+    let n_chunks = n / arg_parser.n;
 
     let num_of_benchmarks = Benchmark::Numbench as usize;
 
@@ -115,50 +116,50 @@ fn main() {
     for k in 0..ntimes {
         bench!(
             Benchmark::Init as usize,
-            init(b.as_mut(), scalar, n),
+            init(b.as_mut(), scalar, n_chunks),
             times,
             k
         );
 
         let tmp = a[10];
 
-        bench!(Benchmark::Sum as usize, sum(a.as_mut(), n), times, k);
+        bench!(Benchmark::Sum as usize, sum(a.as_mut(), n_chunks), times, k);
 
         a[10] = tmp;
 
         bench!(
             Benchmark::Copy as usize,
-            copy(c.as_mut(), a.as_ref(), n),
+            copy(c.as_mut(), a.as_ref(), n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Update as usize,
-            update(a.as_mut(), scalar, n),
+            update(a.as_mut(), scalar, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Triad as usize,
-            triad(a.as_mut(), b.as_ref(), c.as_ref(), scalar, n),
+            triad(a.as_mut(), b.as_ref(), c.as_ref(), scalar, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Daxpy as usize,
-            daxpy(a.as_mut(), b.as_ref(), scalar, n),
+            daxpy(a.as_mut(), b.as_ref(), scalar, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Striad as usize,
-            striad(a.as_mut(), b.as_ref(), c.as_ref(), d.as_ref(), n),
+            striad(a.as_mut(), b.as_ref(), c.as_ref(), d.as_ref(), n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Sdaxpy as usize,
-            sdaxpy(a.as_mut(), b.as_ref(), c.as_ref(), n),
+            sdaxpy(a.as_mut(), b.as_ref(), c.as_ref(), n_chunks),
             times,
             k
         );
