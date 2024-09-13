@@ -18,7 +18,7 @@ pub fn striad(a: &mut [f64], b: &[f64], c: &[f64], d: &[f64], n: usize) -> f64 {
         a_slice
             .iter_mut()
             .enumerate()
-            .for_each(|(i, val)| *val = c[i].mul_add(d[i], b[i]))
+            .for_each(|(i, val)| *val = c[i] * d[i] + b[i])
     });
     s.elapsed().as_secs_f64()
 }

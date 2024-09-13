@@ -4,8 +4,6 @@ rustflags = [
     "-C",
     "target-cpu=native",
     "-C",
-    "target-features=+evex512,+fma4,+fma,+avx512f,+avx512pf,+avx512vl,+avx512dq,+avx512cd,+avx512bw",
-    "-C",
     "llvm-args=-ffast-math",
     "-C",
     "opt-level=3",
