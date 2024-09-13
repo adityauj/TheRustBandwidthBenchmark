@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use rayon::{
-    iter::ParallelIterator,
+    iter::{IndexedParallelIterator, ParallelIterator},
     slice::{ParallelSlice, ParallelSliceMut},
 };
 
@@ -19,11 +19,8 @@ pub fn copy(c: &mut [f64], a: &[f64], n: usize) -> f64 {
     // }
 
     // Parallel version
-    c_iter.for_each(|c_slice| {
-        c_slice
-            .iter_mut()
-            .enumerate()
-            .for_each(|(i, val)| *val = a[i])
+    c_iter.zip(a_iter).for_each(|(c_slice, a_slice)| {
+        c_slice.copy_from_slice(a_slice);
     });
 
     s.elapsed().as_secs_f64()
