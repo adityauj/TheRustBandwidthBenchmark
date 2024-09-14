@@ -1,15 +1,11 @@
 use std::time::Instant;
 
-use rayon::{
-    iter::{IndexedParallelIterator, ParallelIterator},
-    slice::{ParallelSlice, ParallelSliceMut},
-};
+use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, clippy::manual_memcpy, unused_variables)]
 #[inline(never)]
 pub fn copy(c: &mut [f64], a: &[f64], n: usize) -> f64 {
     let c_iter = c.par_chunks_mut(n);
-    let a_iter = a.par_chunks(n);
 
     let s = Instant::now();
 
@@ -19,11 +15,12 @@ pub fn copy(c: &mut [f64], a: &[f64], n: usize) -> f64 {
     // }
 
     // Parallel version
-    c.par_chunks_mut(n)
-        .zip(a.par_chunks(n))
-        .for_each(|(c_slice, a_slice)| {
-            c_slice.copy_from_slice(a_slice);
-        });
+    c_iter.for_each(|c_slice| {
+        c_slice
+            .iter_mut()
+            .enumerate()
+            .for_each(|(i, val)| *val = a[i])
+    });
 
     s.elapsed().as_secs_f64()
 }
