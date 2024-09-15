@@ -38,9 +38,9 @@ fn main() {
     println!("Benchmarking with {:#?} threads.", arg_parser.n);
 
     const BYTES_PER_WORD: usize = size_of::<f64>();
-    let n = arg_parser.size;
+    let size = arg_parser.size;
     let ntimes = arg_parser.ntimes;
-    let n_chunks = n / arg_parser.n;
+    let n_chunks = size / arg_parser.n;
 
     let num_of_benchmarks = Benchmark::Numbench as usize;
 
@@ -98,15 +98,15 @@ fn main() {
     // let mut x: Arc<Vec<f64>> = Arc::new((0..n).into_par_iter().map(|_| (rand::random::<i32>() % 100) as f64 + 1.1).collect());
     // But randomising will fail the check function at the end.
 
-    let mut a: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
-    let mut b: Vec<f64> = (0..n).into_par_iter().map(|_| 2.0).collect();
-    let mut c: Vec<f64> = (0..n).into_par_iter().map(|_| 0.5).collect();
-    let d: Vec<f64> = (0..n).into_par_iter().map(|_| 1.0).collect();
+    let mut a: Vec<f64> = (0..size).into_par_iter().map(|_| 2.0).collect();
+    let mut b: Vec<f64> = (0..size).into_par_iter().map(|_| 2.0).collect();
+    let mut c: Vec<f64> = (0..size).into_par_iter().map(|_| 0.5).collect();
+    let d: Vec<f64> = (0..size).into_par_iter().map(|_| 1.0).collect();
 
     let e = s.elapsed();
     println!(
         "Total allocated datasize: {:.2} MB.",
-        4.0 * (BYTES_PER_WORD * n) as f64 * 1.0e-6
+        4.0 * (BYTES_PER_WORD * size) as f64 * 1.0e-6
     );
 
     println!("Initialization of arrays took : {e:#?}.");
@@ -116,50 +116,62 @@ fn main() {
     for k in 0..ntimes {
         bench!(
             Benchmark::Init as usize,
-            init(b.as_mut(), scalar, n_chunks),
+            init(b.as_mut(), scalar, size, n_chunks),
             times,
             k
         );
 
         let tmp = a[10];
 
-        bench!(Benchmark::Sum as usize, sum(a.as_mut(), n_chunks), times, k);
+        bench!(
+            Benchmark::Sum as usize,
+            sum(a.as_mut(), size, n_chunks),
+            times,
+            k
+        );
 
         a[10] = tmp;
 
         bench!(
             Benchmark::Copy as usize,
-            copy(c.as_mut(), a.as_ref(), n_chunks),
+            copy(c.as_mut(), a.as_ref(), size, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Update as usize,
-            update(a.as_mut(), scalar, n_chunks),
+            update(a.as_mut(), scalar, size, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Triad as usize,
-            triad(a.as_mut(), b.as_ref(), c.as_ref(), scalar, n_chunks),
+            triad(a.as_mut(), b.as_ref(), c.as_ref(), scalar, size, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Daxpy as usize,
-            daxpy(a.as_mut(), b.as_ref(), scalar, n_chunks),
+            daxpy(a.as_mut(), b.as_ref(), scalar, size, n_chunks),
             times,
             k
         );
         bench!(
             Benchmark::Striad as usize,
-            striad(a.as_mut(), b.as_ref(), c.as_ref(), d.as_ref(), n_chunks),
+            striad(
+                a.as_mut(),
+                b.as_ref(),
+                c.as_ref(),
+                d.as_ref(),
+                size,
+                n_chunks
+            ),
             times,
             k
         );
         bench!(
             Benchmark::Sdaxpy as usize,
-            sdaxpy(a.as_mut(), b.as_ref(), c.as_ref(), n_chunks),
+            sdaxpy(a.as_mut(), b.as_ref(), c.as_ref(), size, n_chunks),
             times,
             k
         );
@@ -181,8 +193,8 @@ fn main() {
 
     for j in 0..num_of_benchmarks {
         avgtime[j] /= ntimes as f64;
-        let bytes = benchmarks[j].words * BYTES_PER_WORD * n;
-        let flops = benchmarks[j].flops * n;
+        let bytes = benchmarks[j].words * BYTES_PER_WORD * size;
+        let flops = benchmarks[j].flops * size;
 
         if flops > 0 {
             println!(
@@ -208,5 +220,5 @@ fn main() {
     }
     println!("{HLINE}");
 
-    check(a.as_ref(), b.as_ref(), c.as_ref(), d.as_ref(), n, ntimes);
+    check(a.as_ref(), b.as_ref(), c.as_ref(), d.as_ref(), size, ntimes);
 }

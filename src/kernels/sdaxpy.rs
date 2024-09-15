@@ -3,8 +3,12 @@ use std::time::Instant;
 use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, unused_variables)]
-pub fn sdaxpy(a: &mut [f64], b: &[f64], c: &[f64], n: usize) -> f64 {
-    let a_iter = a.par_chunks_mut(n);
+pub fn sdaxpy(a: &mut [f64], b: &[f64], c: &[f64], n: usize, block_size: usize) -> f64 {
+    let a = &mut a[..n];
+    let b = &b[..n];
+    let c = &c[..n];
+
+    let a_iter = a.par_chunks_mut(block_size);
 
     let s = Instant::now();
 
@@ -18,7 +22,7 @@ pub fn sdaxpy(a: &mut [f64], b: &[f64], c: &[f64], n: usize) -> f64 {
         a_slice
             .iter_mut()
             .enumerate()
-            .for_each(|(i, val)| *val = c[i].mul_add(b[i], *val))
+            .for_each(|(i, val)| *val += c[i] * b[i])
     });
 
     s.elapsed().as_secs_f64()

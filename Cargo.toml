@@ -13,6 +13,6 @@ name = "bench"
 path = "src/main.rs"
 
 [profile.release]
-debug = false
-lto = true
+# debug = true
+# lto = true
 incremental = false

@@ -4,8 +4,10 @@ use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, unused_variables)]
 #[inline(never)]
-pub fn init(b: &mut [f64], scalar: f64, n: usize) -> f64 {
-    let b_iter = b.par_chunks_mut(n);
+pub fn init(b: &mut [f64], scalar: f64, n: usize, block_size: usize) -> f64 {
+    let b = &mut b[..n];
+
+    let b_iter = b.par_chunks_mut(block_size);
 
     let s = Instant::now();
 

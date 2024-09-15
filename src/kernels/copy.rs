@@ -4,8 +4,11 @@ use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, clippy::manual_memcpy, unused_variables)]
 #[inline(never)]
-pub fn copy(c: &mut [f64], a: &[f64], n: usize) -> f64 {
-    let c_iter = c.par_chunks_mut(n);
+pub fn copy(c: &mut [f64], a: &[f64], n: usize, block_size: usize) -> f64 {
+    let c = &mut c[..n];
+    let a = &a[..n];
+
+    let c_iter = c.par_chunks_mut(block_size);
 
     let s = Instant::now();
 

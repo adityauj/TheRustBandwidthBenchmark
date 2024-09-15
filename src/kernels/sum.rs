@@ -3,7 +3,9 @@ use std::time::Instant;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 #[allow(clippy::ptr_arg, unused_variables)]
-pub fn sum(a: &mut [f64], n: usize) -> f64 {
+pub fn sum(a: &mut [f64], n: usize, block_size: usize) -> f64 {
+    let a = &mut a[..n];
+
     let s = Instant::now();
 
     // Serial version

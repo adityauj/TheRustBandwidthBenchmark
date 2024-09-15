@@ -3,8 +3,13 @@ use std::time::Instant;
 use rayon::{iter::ParallelIterator, slice::ParallelSliceMut};
 
 #[allow(clippy::ptr_arg, unused_variables)]
-pub fn striad(a: &mut [f64], b: &[f64], c: &[f64], d: &[f64], n: usize) -> f64 {
-    let a_iter = a.par_chunks_mut(n);
+pub fn striad(a: &mut [f64], b: &[f64], c: &[f64], d: &[f64], n: usize, block_size: usize) -> f64 {
+    let a = &mut a[..n];
+    let b = &b[..n];
+    let c = &c[..n];
+    let d = &d[..n];
+
+    let a_iter = a.par_chunks_mut(block_size);
 
     let s = Instant::now();
 
