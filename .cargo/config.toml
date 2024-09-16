@@ -1,14 +1,12 @@
 # For generic x86_64 architecture.
-[x86-64-unknown-linux-gnu]
+[target.x86-64-unknown-linux-gnu]
 rustflags = [
     "-C",
-    "target-cpu=x86-64-v4",
-    "-C",
-    "target-feature=+fma,+avx2,+avx",
-    "-C",
-    "llvm-args=-ffast-math",
+    "target-cpu=native",
     "-C",
     "opt-level=3",
+    "-C",
+    "llvm-args=\"--pass-remarks=.*vector.* --pass-remarks-analysis=.*vector.*\"",
 ]
 
 # Use +avx512 to enable avx512.
