@@ -13,10 +13,6 @@ $(TARGET):
 	@cargo b --release
 	@cp ./target/release/$(TARGET) $(TARGET)
 
-# swagger:
-# 	$(info ===>  GENERATE swagger)
-# 	@go run github.com/swaggo/swag/cmd/swag init -d ./internal/api,./internal/util -g api.go -o ./api
-# 	@mv ./api/docs.go ./internal/api/docs.go
 install:
 	$(info ===>  INSTALL)
 	@cargo install cargo-asm
@@ -29,6 +25,7 @@ clean:
 	$(info ===>  CLEAN)
 	@cargo clean
 	@rm -f $(TARGET)
+	@rm -f *.data *svg *.data.old
 
 test:
 	$(info ===>  TESTING)
